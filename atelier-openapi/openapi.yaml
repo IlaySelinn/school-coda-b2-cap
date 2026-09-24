@@ -356,27 +356,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TripDetail'
-              example:
-                id: a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
-                departureCity:
-                  id: 3f2a1b8c-5d4e-4f6a-9b8c-1d2e3f4a5b6c
-                  name: Dijon
-                arrivalCity:
-                  id: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
-                  name: Paris
-                departureTime: '2026-10-15T08:30:00Z'
-                durationMinutes: 12
-                pricePerSeat: 45.00
-                maxWeightKg: 95.5
-                catapultModel: Baliste-MkIV
-                boardingInstructions: Présence requise sur le pas de tir 15 minutes avant l'heure de lancer. Casque fourni.
-        '400': { $ref: '#/components/responses/BadRequest' }
         '404': { $ref: '#/components/responses/NotFound' }
   # ---- Panier (authentifié) ------------------------------------------------
 
   # POST /carts
   #   Ouvrir un panier vide. C'est ici que la connexion devient nécessaire :
   #   la découverte est libre, la réservation est nominative.
+
 
   # GET /carts
   #   Récupérer le panier actif du voyageur connecté. Un voyageur n'a qu'un
@@ -662,7 +648,10 @@ components:
           type: string
           format: date-time
           example: "2026-11-15T08:30:00Z"
-        pricePerCity:
+        durationMinutes: 
+          type: integer
+          example: 12
+        pricePerSeat:
           type: number
           format: float
           example: 45.00
@@ -692,9 +681,46 @@ components:
 
     # Cart
     #   Un panier de réservation. Il connaît son état, ses lignes, et son total.
-
+      Cart:
+       type: object
+      required: [id,status,totalAmount,createdAt]
+      properties: 
+        id: 
+          type: string
+          format: uuid
+          example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        status: 
+          type: string
+          enum: [pending,paid]
+          example: pending
+        totalAmount: 
+          type: number
+          format: number
+          example: 90.00
+        createdAt: 
+          type: string
+          format: date-time
+          example: "2026-10-15T10:00:00Z" 
+          
     # CartItem
     #   Une ligne de panier : un lancer et un nombre de places.
-
+    CartItem:
+      type: object
+      required: [id, trip, passengers, subtotal]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 8e7d6c5b-4a3f-2e1d-0c9b-8a7b6c5d4e3f
+        trip:
+          $ref: "#/components/schemas/TripSummary"
+        passengers:
+          type: integer
+          minimum: 1
+          example: 2
+        subtotal:
+          type: number
+          format: float
+          example: 90.00
     # Ticket
     #   Un droit à embarquer sur un lancer, émis au paiement. Un par place.
